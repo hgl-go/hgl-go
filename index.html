@@ -3,445 +3,443 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Biblioteca Virtual de Gineco-Obstetricia - HGL</title>
-    <!-- Tailwind CSS -->
+    <title>Repositorio de Monografías | Gineco-Obstetricia HGL</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts (Inter) -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Phosphor Icons -->
-    <script src="https://unpkg.com/@phosphor-icons/web"></script>
-    
     <style>
         body { font-family: 'Inter', sans-serif; }
-        /* Custom scrollbar for a cleaner look */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        
-        .modal-enter { animation: fadeIn 0.3s ease-out forwards; }
-        .modal-leave { animation: fadeOut 0.3s ease-out forwards; }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 8px;
+            padding: 16px;
+            position: fixed;
+            z-index: 50;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
         }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: scale(1); }
-            to { opacity: 0; transform: scale(0.95); }
+        .toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 2.5s;
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<body class="bg-slate-50 min-h-screen flex flex-col">
 
-    <!-- Header / Navbar -->
-    <header class="bg-gradient-to-r from-pink-400 to-sky-400 text-white shadow-md sticky top-0 z-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <div class="flex items-center gap-3">
-                <img src="LOGO GO HGL.jpg" alt="Logo Gineco-Obstetricia HGL" class="h-12 w-12 object-contain bg-white rounded-full p-0.5 shadow-sm" onerror="this.src='https://placehold.co/100x100/pink/white?text=HGL'">
-                <div>
-                    <h1 class="text-xl font-bold leading-tight">Biblioteca Virtual</h1>
-                    <p class="text-pink-50 text-xs font-medium">Gineco-Obstetricia - Hospital General de Luque</p>
+    <!-- Navbar Institucional -->
+    <nav class="bg-white shadow-sm border-b border-pink-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-20">
+                <div class="flex items-center">
+                    <img src="LOGO GO HGL.jpg" alt="Logo HGL" class="h-14 w-auto mr-4 rounded-full border-2 border-pink-100 object-cover" onerror="this.src='https://via.placeholder.com/60?text=HGL'">
+                    <div class="flex flex-col">
+                        <span class="text-xl font-bold text-slate-800 leading-tight">Hospital General de Luque</span>
+                        <span class="text-sm font-medium text-pink-600">Departamento de Gineco-Obstetricia</span>
+                    </div>
                 </div>
             </div>
-            <button onclick="openModal()" class="bg-white text-pink-600 hover:bg-pink-50 px-4 py-2 rounded-lg font-medium text-sm transition-colors flex items-center gap-2 shadow-sm">
-                <i class="ph ph-upload-simple text-lg"></i>
-                <span class="hidden sm:inline">Subir Monografía</span>
+        </div>
+    </nav>
+
+    <!-- Header y Filtros -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-slate-800">Repositorio Académico</h1>
+                <p class="text-slate-500 mt-1">Consulta las monografías e investigaciones del programa de residencias.</p>
+            </div>
+            <button onclick="openModal()" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2.5 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                Subir Trabajo
             </button>
         </div>
-    </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
-        
-        <!-- Search and Filters -->
-        <section class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row gap-4">
-            <div class="flex-grow relative">
-                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 text-lg"></i>
-                <input type="text" id="searchInput" placeholder="Buscar por título o autor..." 
-                       class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 focus:border-pink-400 transition-shadow">
+        <!-- Barra de Búsqueda y Filtros -->
+        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-8 flex flex-col md:flex-row gap-4">
+            <div class="flex-1 relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                </div>
+                <input type="text" id="searchInput" class="pl-10 w-full border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:ring-pink-500 focus:border-pink-500 text-slate-700 bg-slate-50 border" placeholder="Buscar por título, autor o palabras clave...">
             </div>
-            <div class="flex gap-4 w-full md:w-auto">
-                <select id="specialtyFilter" class="flex-1 md:w-48 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white">
-                    <option value="">Todas las Áreas</option>
-                    <option value="Obstetricia">Obstetricia</option>
-                    <option value="Ginecología">Ginecología</option>
-                    <option value="Mastología">Mastología</option>
-                    <option value="Oncología Ginecológica">Oncología Ginecológica</option>
-                    <option value="Planificación Familiar">Planificación Familiar</option>
-                </select>
-                <select id="yearFilter" class="flex-1 md:w-32 px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white">
-                    <option value="">Todos los Años</option>
-                    <option value="2026">2026</option>
-                    <option value="2025">2025</option>
-                    <option value="2024">2024</option>
-                    <option value="2023">2023</option>
-                </select>
+            <select id="filterSpecialty" class="border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:ring-pink-500 focus:border-pink-500 text-slate-700 w-full md:w-64 bg-slate-50 border">
+                <option value="all">Todas las líneas de investigación</option>
+                <option value="alteraciones">Alteraciones ginecológicas y reproductivas</option>
+                <option value="materno-fetal">Enfermedades materno fetales</option>
+                <option value="oncologia">Enfermedades oncológicas</option>
+                <option value="asistencia">Técnicas de asistencia médicas</option>
+            </select>
+            <select id="filterYear" class="border-slate-300 rounded-lg px-4 py-2.5 text-sm focus:ring-pink-500 focus:border-pink-500 text-slate-700 w-full md:w-32 bg-slate-50 border">
+                <option value="all">Todos los años</option>
+                <option value="2026">2026</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+            </select>
+        </div>
+
+        <!-- Contenedor de Monografías -->
+        <div id="monografiasContainer" class="space-y-4">
+
+            <!-- MONOGRAFÍA 1 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-pink-400 hover:shadow-md transition-shadow" data-specialty="materno-fetal" data-year="2026">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-pink-100 text-pink-800 text-xs font-semibold px-2.5 py-1 rounded">Enfermedades materno fetales</span>
+                            <span class="text-sm text-slate-500 font-medium">2026</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            FRECUENCIA DE MACROSOMIA FETAL Y FACTORES MATERNOS PRESENTES EN MUJERES EMBARAZADAS DEL HOSPITAL GENERAL DE LUQUE DURANTE EL PERIODO 2023-2024
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> Lourdes Romina Meza Cano</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Dr. Jorge Ariel Arce, Dra. Marta Inés Ferreira Gaona, Dra. Clarisse Virginia Diaz Reissner</p>
+                        <button onclick="copiarCita('Meza Cano LR', 'FRECUENCIA DE MACROSOMIA FETAL Y FACTORES MATERNOS PRESENTES EN MUJERES EMBARAZADAS DEL HOSPITAL GENERAL DE LUQUE DURANTE EL PERIODO 2023-2024', '2026')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/17Ie5fVZrUsbQNk1QOYzRf0gksSmX7uW8/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
             </div>
-        </section>
 
-        <!-- Results Info -->
-        <div class="mb-4 flex justify-between items-center text-sm text-slate-500">
-            <span id="resultsCount">Cargando documentos...</span>
+            <!-- MONOGRAFÍA 2 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-400 hover:shadow-md transition-shadow" data-specialty="oncologia" data-year="2026">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-1 rounded">Enfermedades oncológicas</span>
+                            <span class="text-sm text-slate-500 font-medium">2026</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            NIVEL DE CONOCIMIENTO SOBRE CÁNCER DE CUELLO UTERINO EN MUJERES QUE ACUDEN AL HOSPITAL GENERAL DE LUQUE EN EL PERIODO DEL MES OCTUBRE - NOVIEMBRE DEL AÑO 2025
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> Avelina Almeida</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Dr. Jorge Ariel Arce, Prof. Dra. Marta Ferreira, Dra. Clarisse Díaz, Dra. Cynthia Jara, Lic. Mayra Azucas</p>
+                        <button onclick="copiarCita('Almeida A', 'NIVEL DE CONOCIMIENTO SOBRE CÁNCER DE CUELLO UTERINO EN MUJERES QUE ACUDEN AL HOSPITAL GENERAL DE LUQUE EN EL PERIODO DEL MES OCTUBRE - NOVIEMBRE DEL AÑO 2025', '2026')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/1hOYLay09bPTXW3hW-n9Z5w4XTS3mrmHC/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONOGRAFÍA 3 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-400 hover:shadow-md transition-shadow" data-specialty="alteraciones" data-year="2026">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded">Alteraciones ginecológicas y reproductivas</span>
+                            <span class="text-sm text-slate-500 font-medium">2026</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            CARACTERÍSTICAS CLÍNICAS, ECOGRÁFICAS E HISTOPATOLÓGICAS DE PACIENTES CON SANGRADO UTERINO ANORMAL SOMETIDAS AL LEGRADO BIÓPSICO EN EL HOSPITAL GENERAL DE LUQUE
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> María Verónica Mercado Allende</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Dr. Jorge Ariel Arce, Dra. Natalia Cabrera, Dra. Celia Martínez, Dra. Marta Inés Ferreira Gaona</p>
+                        <button onclick="copiarCita('Mercado Allende MV', 'CARACTERÍSTICAS CLÍNICAS, ECOGRÁFICAS E HISTOPATOLÓGICAS DE PACIENTES CON SANGRADO UTERINO ANORMAL SOMETIDAS AL LEGRADO BIÓPSICO EN EL HOSPITAL GENERAL DE LUQUE', '2026')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/1G8Ef3pMUSEikfYiQYnKzmRhPYv64W9bL/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONOGRAFÍA 4 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-400 hover:shadow-md transition-shadow" data-specialty="alteraciones" data-year="2025">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded">Alteraciones ginecológicas y reproductivas</span>
+                            <span class="text-sm text-slate-500 font-medium">2025</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            RIESGO DE PRIMER EVENTO CARDIOVASCULAR ATEROESCLERÓTICO A 10 AÑOS EN MUJERES PREMENOPÁUSICAS Y MENOPÁUSICAS CONSULTORIO DE GINECOLOGÍA. HOSPITAL GENERAL DE LUQUE, 2023 – 2024
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> Dra. Liz Paola Barrios Yrala</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Prof. Dr. Jorge Arce</p>
+                        <button onclick="copiarCita('Barrios Yrala LP', 'RIESGO DE PRIMER EVENTO CARDIOVASCULAR ATEROESCLERÓTICO A 10 AÑOS EN MUJERES PREMENOPÁUSICAS Y MENOPÁUSICAS CONSULTORIO DE GINECOLOGÍA. HOSPITAL GENERAL DE LUQUE, 2023 – 2024', '2025')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/1GnVUCl03CvPCzomjE3eprVWv_DvnCEF-/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONOGRAFÍA 5 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-pink-400 hover:shadow-md transition-shadow" data-specialty="materno-fetal" data-year="2026">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-pink-100 text-pink-800 text-xs font-semibold px-2.5 py-1 rounded">Enfermedades materno fetales</span>
+                            <span class="text-sm text-slate-500 font-medium">2026</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            PREVALENCIA DE PARTO VAGINAL EN GESTANTES CON CESÁREA PREVIA INGRESADAS EN EL HOSPITAL GENERAL DE LUQUE EN EL PERIODO 2022 - 2024
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> Matías Emmanuel Rodriguez Sanabria</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Dr. Jorge Ariel Arce, Dra. Marta Inés Ferreira Gaona, Dra. Clarisse Virginia Diaz Reissner</p>
+                        <button onclick="copiarCita('Rodriguez Sanabria ME', 'PREVALENCIA DE PARTO VAGINAL EN GESTANTES CON CESÁREA PREVIA INGRESADAS EN EL HOSPITAL GENERAL DE LUQUE EN EL PERIODO 2022 - 2024', '2026')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/14ZRrT21kIN235zuga48nC9foeDASLAxt/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONOGRAFÍA 6 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-blue-400 hover:shadow-md transition-shadow" data-specialty="alteraciones" data-year="2026">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-1 rounded">Alteraciones ginecológicas y reproductivas</span>
+                            <span class="text-sm text-slate-500 font-medium">2026</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            PREVALENCIA DEL USO DE IMPLANTES ANTICONCEPTIVOS SUBDÉRMICOS EN ADOLESCENTES DE 13 A 19 AÑOS ATENDIDAS EN EL SERVICIO ÑANGAREKO DEL HOSPITAL GENERAL DE LUQUE-PARAGUAY. PERIODO: ENERO - DICIEMBRE 2023
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> Dr. Víctor Daniel Figueredo Torres</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Dr. Jorge Ariel Arce Ramírez, Dra. Marta Inés Ferreira Gaona, Lic. Mayra Janice Azucas Recalde</p>
+                        <button onclick="copiarCita('Figueredo Torres VD', 'PREVALENCIA DEL USO DE IMPLANTES ANTICONCEPTIVOS SUBDÉRMICOS EN ADOLESCENTES DE 13 A 19 AÑOS ATENDIDAS EN EL SERVICIO ÑANGAREKO DEL HOSPITAL GENERAL DE LUQUE-PARAGUAY. PERIODO: ENERO - DICIEMBRE 2023', '2026')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/1C39u-aAT8UuG9Q5FKcWGKub3vDsqcAFC/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONOGRAFÍA 7 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-pink-400 hover:shadow-md transition-shadow" data-specialty="materno-fetal" data-year="2024">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-pink-100 text-pink-800 text-xs font-semibold px-2.5 py-1 rounded">Enfermedades materno fetales</span>
+                            <span class="text-sm text-slate-500 font-medium">2024</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            FACTORES DE RIESGO MÁS PREVALENTES EN MUJERES CON PREECLAMPSIA Y SU IMPACTO EN LOS RESULTADOS NEONATALES EN EL HOSPITAL GENERAL DE LUQUE (2021-2023)
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> Alma María Isabel Villalba Miranda</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Dr. Jorge Ariel Arce</p>
+                        <button onclick="copiarCita('Villalba Miranda AMI', 'FACTORES DE RIESGO MÁS PREVALENTES EN MUJERES CON PREECLAMPSIA Y SU IMPACTO EN LOS RESULTADOS NEONATALES EN EL HOSPITAL GENERAL DE LUQUE (2021-2023)', '2024')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/1Wlz97lm-J3hfemVVay4MZIPG9uAmgEwF/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONOGRAFÍA 8 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-400 hover:shadow-md transition-shadow" data-specialty="oncologia" data-year="2026">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-1 rounded">Enfermedades oncológicas</span>
+                            <span class="text-sm text-slate-500 font-medium">2026</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            PREVALENCIA DEL VIRUS DEL PAPILOMA HUMANO DE ALTO RIESGO EN LAS PACIENTES ATENDIDAS EN EL HOSPITAL GENERAL DE LUQUE EN EL PERIODO 2021 A 2024
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> Maria Alejandra Chavez Zarate</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Dr. Jorge Ariel Arce, Prof. Dra. Marta Ferreira, Dra. Clarisse Díaz, Dra. Cynthia Jara, Lic. Mayra Azucas</p>
+                        <button onclick="copiarCita('Chavez Zarate MA', 'PREVALENCIA DEL VIRUS DEL PAPILOMA HUMANO DE ALTO RIESGO EN LAS PACIENTES ATENDIDAS EN EL HOSPITAL GENERAL DE LUQUE EN EL PERIODO 2021 A 2024', '2026')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/1fRDlZkRE5GqZ-dqOZrUXge1wDngtTdY6/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MONOGRAFÍA 9 -->
+            <div class="monografia-card bg-white p-6 rounded-xl shadow-sm border-l-4 border-purple-400 hover:shadow-md transition-shadow" data-specialty="oncologia" data-year="2024">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-1 rounded">Enfermedades oncológicas</span>
+                            <span class="text-sm text-slate-500 font-medium">2024</span>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900 leading-tight mb-2">
+                            PREVALENCIA DE LESIONES INTRAEPITELIALES CERVICALES DE ALTO GRADO EN MUJERES MENORES DE 30 AÑOS ATENDIDAS EN EL HOSPITAL GENERAL DE LUQUE DURANTE EL PERIODO 2022-2023
+                        </h3>
+                        <p class="text-slate-600 text-sm"><strong>Autor:</strong> Carlos Raúl Santander Espinoza</p>
+                        <p class="text-slate-600 text-sm mb-3"><strong>Tutor:</strong> Dr. Jorge Arce, Prof. Dra. Marta Inés Ferreira Gaona, PhD. Clarisse Virginia Díaz Reissner</p>
+                        <button onclick="copiarCita('Santander Espinoza CR', 'PREVALENCIA DE LESIONES INTRAEPITELIALES CERVICALES DE ALTO GRADO EN MUJERES MENORES DE 30 AÑOS ATENDIDAS EN EL HOSPITAL GENERAL DE LUQUE DURANTE EL PERIODO 2022-2023', '2024')" class="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center gap-1 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"></path></svg>
+                            Copiar cita Vancouver
+                        </button>
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto shrink-0">
+                        <a href="https://drive.google.com/file/d/1GlIf6BQBZpgkJEQ20Ta4c_gIX9NGUwEo/view?usp=drive_link" target="_blank" rel="noopener noreferrer" class="w-full md:w-auto text-center bg-blue-50 text-blue-700 hover:bg-blue-100 font-medium py-2.5 px-6 rounded-lg transition-colors border border-blue-200">
+                            Ver PDF
+                        </a>
+                    </div>
+                </div>
+            </div>
+
         </div>
+    </div>
 
-        <!-- Grid -->
-        <div id="monographGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Cards will be injected here by JS -->
-        </div>
-
-        <!-- Empty State (Hidden by default) -->
-        <div id="emptyState" class="hidden flex flex-col items-center justify-center py-16 text-slate-500">
-            <i class="ph ph-file-search text-6xl mb-4 text-slate-300"></i>
-            <h3 class="text-lg font-medium text-slate-700">No se encontraron resultados</h3>
-            <p>Intenta ajustar tu búsqueda o filtros.</p>
-        </div>
-
-    </main>
-
-    <!-- Footer -->
-    <footer class="bg-slate-800 text-slate-400 py-6 text-center text-sm">
-        <p>© 2026 Dpto. de Gineco-Obstetricia - Hospital General de Luque. Todos los derechos reservados.</p>
-    </footer>
-
-    <!-- Upload Modal -->
-    <div id="uploadModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-900 bg-opacity-50 backdrop-blur-sm px-4">
-        <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto modal-enter" id="modalContent">
-            <div class="flex justify-between items-center p-6 border-b border-slate-100">
-                <h2 class="text-xl font-bold text-slate-800">Registrar Nueva Monografía</h2>
-                <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
-                    <i class="ph ph-x text-2xl"></i>
+    <!-- Modal para Subir Trabajo -->
+    <div id="uploadModal" class="fixed inset-0 bg-slate-900 bg-opacity-50 hidden items-center justify-center z-40">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+            <div class="bg-pink-600 px-6 py-4 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-white">Subir Monografía al Repositorio</h3>
+                <button onclick="closeModal()" class="text-white hover:text-pink-200">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            
-            <form id="uploadForm" class="p-6 space-y-5">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Título del Trabajo *</label>
-                        <input type="text" id="formTitle" required placeholder="Ej. Prevalencia de..." class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="p-6">
+                <p class="text-sm text-slate-600 mb-6">Completa el formulario para enviar tu trabajo final. El documento debe estar en formato PDF.</p>
+                <form id="uploadForm" onsubmit="handleUpload(event)">
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-slate-700 mb-1">Archivo de la Monografía (PDF)</label>
+                        <input type="file" id="fileInput" accept=".pdf" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 border border-slate-200 rounded-lg">
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Autor(es) *</label>
-                        <input type="text" id="formAuthor" required placeholder="Ej. Dra. María González" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 mb-6 space-y-3">
+                        <label class="flex items-start gap-3">
+                            <input type="checkbox" required class="mt-1 text-pink-600 focus:ring-pink-500 rounded border-slate-300">
+                            <span class="text-sm text-slate-700">Confirmo que este trabajo cuenta con la aprobación del Comité de Ética en Investigación.</span>
+                        </label>
+                        <label class="flex items-start gap-3">
+                            <input type="checkbox" required class="mt-1 text-pink-600 focus:ring-pink-500 rounded border-slate-300">
+                            <span class="text-sm text-slate-700">Autorizo la difusión de este documento en el repositorio institucional del Hospital General de Luque.</span>
+                        </label>
                     </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Tutor Institucional</label>
-                        <input type="text" id="formTutor" placeholder="Opcional" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400">
+                    <div class="flex justify-end gap-3">
+                        <button type="button" onclick="closeModal()" class="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 font-medium">Cancelar</button>
+                        <button type="submit" class="bg-pink-600 hover:bg-pink-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">Enviar Trabajo</button>
                     </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Área / Subespecialidad *</label>
-                        <select id="formSpecialty" required class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400 bg-white">
-                            <option value="" disabled selected>Seleccionar...</option>
-                            <option value="Obstetricia">Obstetricia</option>
-                            <option value="Ginecología">Ginecología</option>
-                            <option value="Mastología">Mastología</option>
-                            <option value="Oncología Ginecológica">Oncología Ginecológica</option>
-                            <option value="Planificación Familiar">Planificación Familiar</option>
-                        </select>
-                    </div>
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">Año de Defensa *</label>
-                        <input type="number" id="formYear" required min="2000" max="2026" value="2026" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-400">
-                    </div>
-                </div>
-
-                <div class="border border-slate-200 rounded-lg p-4 bg-slate-50 space-y-3">
-                    <h3 class="text-sm font-semibold text-slate-800">Requisitos Legales y Éticos</h3>
-                    
-                    <label class="flex items-start gap-3 cursor-pointer">
-                        <input type="checkbox" id="formEthics" class="mt-1 w-4 h-4 text-pink-500 border-slate-300 rounded focus:ring-pink-500">
-                        <span class="text-sm text-slate-600">
-                            El presente trabajo cuenta con la aprobación del <strong>Comité de Ética en Investigación (CEI)</strong> de la institución (Requerido para estudios clínicos/reportes de caso).
-                        </span>
-                    </label>
-                    
-                    <label class="flex items-start gap-3 cursor-pointer">
-                        <input type="checkbox" id="formConsent" required class="mt-1 w-4 h-4 text-pink-500 border-slate-300 rounded focus:ring-pink-500">
-                        <span class="text-sm text-slate-600">
-                            <strong>Consentimiento del Autor:</strong> Autorizo de forma expresa a la institución a almacenar, reproducir y publicar este documento en el repositorio institucional de acceso abierto. *
-                        </span>
-                    </label>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Archivo de la Monografía (PDF) *</label>
-                    <input type="file" accept=".pdf" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 cursor-pointer border border-slate-300 rounded-lg p-1">
-                </div>
-
-                <div class="pt-4 flex justify-end gap-3 border-t border-slate-100">
-                    <button type="button" onclick="closeModal()" class="px-5 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="px-5 py-2 text-sm font-medium text-white bg-pink-500 rounded-lg hover:bg-pink-600 transition-colors shadow-sm">
-                        Guardar Monografía
-                    </button>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-5 right-5 transform translate-y-20 opacity-0 transition-all duration-300 bg-emerald-600 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-3 z-50">
-        <i class="ph ph-check-circle text-xl"></i>
-        <span id="toastMessage" class="font-medium text-sm">Operación exitosa</span>
-    </div>
+    <!-- Toast de Notificación -->
+    <div id="toast" class="toast">Acción completada con éxito.</div>
 
+    <!-- Scripts de interactividad -->
     <script>
-        // Mock Data specifically requested
-        let monographs = [
-            {
-                id: 1,
-                title: "Eficacia del misoprostol en la maduración cervical en gestantes a término",
-                author: "Dra. María González",
-                specialty: "Obstetricia",
-                year: 2026,
-                dateAdded: "2026-11-01"
-            },
-            {
-                id: 2,
-                title: "Factores de riesgo asociados al cáncer de mama en pacientes menores de 40 años",
-                author: "Dr. Carlos Ruiz",
-                specialty: "Mastología",
-                year: 2025,
-                dateAdded: "2025-05-15"
-            },
-            {
-                id: 3,
-                title: "Manejo quirúrgico del cáncer de endometrio en estadios tempranos",
-                author: "Dra. Ana Silva",
-                specialty: "Oncología Ginecológica",
-                year: 2026,
-                dateAdded: "2026-08-22"
-            },
-            {
-                id: 4,
-                title: "Aceptación y uso del implante subdérmico en puérperas adolescentes",
-                author: "Dr. Luis Pérez",
-                specialty: "Planificación Familiar",
-                year: 2024,
-                dateAdded: "2024-12-10"
-            }
-        ];
+        // Lógica de Búsqueda y Filtrado
+        const searchInput = document.getElementById('searchInput');
+        const filterSpecialty = document.getElementById('filterSpecialty');
+        const filterYear = document.getElementById('filterYear');
+        const cards = document.querySelectorAll('.monografia-card');
 
-        // Format author name for Vancouver (e.g. "Dra. María González" -> "González M")
-        function formatVancouverAuthor(authorString) {
-            // Remove titles
-            let clean = authorString.replace(/^(Dr\.|Dra\.|Lic\.)\s*/i, '').trim();
-            let parts = clean.split(' ');
-            if (parts.length === 1) return parts[0];
-            
-            // Assume last word is surname for this simple mock
-            let surname = parts[parts.length - 1];
-            let nameInitials = parts.slice(0, parts.length - 1).map(n => n.charAt(0)).join('');
-            return `${surname} ${nameInitials}`;
-        }
+        function filterCards() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const specialtyValue = filterSpecialty.value;
+            const yearValue = filterYear.value;
 
-        // Generate Vancouver Citation string
-        function getVancouverCitation(item) {
-            let authorFormated = formatVancouverAuthor(item.author);
-            return `${authorFormated}. ${item.title}. [Monografía de Residencia]. Sede Institucional; ${item.year}.`;
-        }
+            cards.forEach(card => {
+                const text = card.innerText.toLowerCase();
+                const specialty = card.getAttribute('data-specialty');
+                const year = card.getAttribute('data-year');
 
-        function renderMonographs(dataToRender) {
-            const grid = document.getElementById('monographGrid');
-            const emptyState = document.getElementById('emptyState');
-            const countLabel = document.getElementById('resultsCount');
-            
-            grid.innerHTML = '';
-            
-            if (dataToRender.length === 0) {
-                grid.classList.add('hidden');
-                emptyState.classList.remove('hidden');
-                emptyState.classList.add('flex');
-                countLabel.textContent = `0 documentos encontrados`;
-                return;
-            }
+                const matchesSearch = text.includes(searchTerm);
+                const matchesSpecialty = specialtyValue === 'all' || specialty === specialtyValue;
+                const matchesYear = yearValue === 'all' || year === yearValue;
 
-            grid.classList.remove('hidden');
-            emptyState.classList.add('hidden');
-            emptyState.classList.remove('flex');
-            countLabel.textContent = `Mostrando ${dataToRender.length} documento(s)`;
-
-            dataToRender.forEach(item => {
-                const citation = getVancouverCitation(item);
-                
-                // Color coding for specialty badges
-                let badgeColor = 'bg-pink-100 text-pink-800';
-                if(item.specialty === 'Obstetricia') badgeColor = 'bg-sky-100 text-sky-800';
-                if(item.specialty === 'Mastología') badgeColor = 'bg-purple-100 text-purple-800';
-                if(item.specialty === 'Oncología Ginecológica') badgeColor = 'bg-rose-100 text-rose-800';
-                if(item.specialty === 'Planificación Familiar') badgeColor = 'bg-emerald-100 text-emerald-800';
-
-                const cardHTML = `
-                    <article class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-shadow">
-                        <div class="p-5 flex-grow">
-                            <div class="flex justify-between items-start mb-3">
-                                <span class="${badgeColor} text-xs font-semibold px-2.5 py-1 rounded-full">
-                                    ${item.specialty}
-                                </span>
-                                <span class="bg-slate-100 text-slate-600 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1">
-                                    <i class="ph ph-calendar-blank"></i> ${item.year}
-                                </span>
-                            </div>
-                            <h3 class="font-bold text-lg text-slate-800 leading-snug mb-2 line-clamp-3" title="${item.title}">
-                                ${item.title}
-                            </h3>
-                            <p class="text-slate-600 text-sm flex items-center gap-2 mb-4">
-                                <i class="ph ph-user text-slate-400"></i> ${item.author}
-                            </p>
-                            
-                            <div class="bg-slate-50 rounded-lg p-3 border border-slate-100 mt-auto">
-                                <p class="text-xs text-slate-500 font-semibold mb-1 flex justify-between">
-                                    Cita Vancouver 
-                                    <button onclick="copyCitation('${citation.replace(/'/g, "\\'")}')" class="text-pink-600 hover:text-pink-800 text-xs flex items-center gap-1" title="Copiar al portapapeles">
-                                        <i class="ph ph-copy"></i> Copiar
-                                    </button>
-                                </p>
-                                <p class="text-xs text-slate-700 italic select-all">${citation}</p>
-                            </div>
-                        </div>
-                        <div class="bg-slate-50 border-t border-slate-200 p-3 flex justify-end gap-2">
-                            <button onclick="showToast('Previsualización no disponible en demo')" class="text-slate-600 hover:text-sky-600 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1">
-                                <i class="ph ph-eye"></i> Ver
-                            </button>
-                            <button onclick="showToast('Descarga iniciada...')" class="bg-sky-50 text-sky-700 hover:bg-sky-100 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1">
-                                <i class="ph ph-download-simple"></i> PDF
-                            </button>
-                        </div>
-                    </article>
-                `;
-                grid.insertAdjacentHTML('beforeend', cardHTML);
+                if (matchesSearch && matchesSpecialty && matchesYear) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
             });
         }
 
-        // Filtering logic
-        function filterData() {
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            const specialty = document.getElementById('specialtyFilter').value;
-            const year = document.getElementById('yearFilter').value;
+        searchInput.addEventListener('input', filterCards);
+        filterSpecialty.addEventListener('change', filterCards);
+        filterYear.addEventListener('change', filterCards);
 
-            const filtered = monographs.filter(item => {
-                const matchesSearch = item.title.toLowerCase().includes(searchTerm) || item.author.toLowerCase().includes(searchTerm);
-                const matchesSpecialty = specialty === "" || item.specialty === specialty;
-                const matchesYear = year === "" || item.year.toString() === year;
-                return matchesSearch && matchesSpecialty && matchesYear;
+        // Generador de Citas Vancouver
+        function copiarCita(autor, titulo, anio) {
+            const cita = `${autor}. ${titulo}. Repositorio del Hospital General de Luque. Departamento de Gineco-Obstetricia; ${anio}.`;
+            
+            navigator.clipboard.writeText(cita).then(() => {
+                showToast("Cita Vancouver copiada al portapapeles.");
+            }).catch(err => {
+                console.error('Error al copiar: ', err);
             });
-
-            // Sort by year descending
-            filtered.sort((a, b) => b.year - a.year);
-            renderMonographs(filtered);
         }
 
-        // Event Listeners for filters
-        document.getElementById('searchInput').addEventListener('input', filterData);
-        document.getElementById('specialtyFilter').addEventListener('change', filterData);
-        document.getElementById('yearFilter').addEventListener('change', filterData);
-
-        // Modal Logic
+        // Lógica del Modal
         const modal = document.getElementById('uploadModal');
-        const modalContent = document.getElementById('modalContent');
-        const form = document.getElementById('uploadForm');
-
+        
         function openModal() {
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            modalContent.classList.remove('modal-leave');
-            modalContent.classList.add('modal-enter');
         }
 
         function closeModal() {
-            modalContent.classList.remove('modal-enter');
-            modalContent.classList.add('modal-leave');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                form.reset();
-            }, 250); // wait for animation
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.getElementById('uploadForm').reset();
         }
 
-        // Form Submission
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            // Check specific requirements
-            const consentGiven = document.getElementById('formConsent').checked;
-            if (!consentGiven) {
-                showToast("Debes aceptar el consentimiento de publicación.", true);
-                return;
-            }
-
-            const newMonograph = {
-                id: Date.now(),
-                title: document.getElementById('formTitle').value,
-                author: document.getElementById('formAuthor').value,
-                specialty: document.getElementById('formSpecialty').value,
-                year: parseInt(document.getElementById('formYear').value),
-                dateAdded: new Date().toISOString().split('T')[0]
-            };
-
-            monographs.unshift(newMonograph); // Add to beginning
-            filterData(); // re-render with current filters
+        function handleUpload(event) {
+            event.preventDefault();
             closeModal();
-            showToast("Monografía subida exitosamente al repositorio.");
-        });
-
-        // Toast Notification System
-        let toastTimeout;
-        function showToast(message, isError = false) {
-            const toast = document.getElementById('toast');
-            const msgEl = document.getElementById('toastMessage');
-            
-            msgEl.textContent = message;
-            
-            if (isError) {
-                toast.classList.remove('bg-emerald-600');
-                toast.classList.add('bg-red-600');
-                toast.innerHTML = `<i class="ph ph-warning-circle text-xl"></i><span class="font-medium text-sm">${message}</span>`;
-            } else {
-                toast.classList.remove('bg-red-600');
-                toast.classList.add('bg-emerald-600');
-                toast.innerHTML = `<i class="ph ph-check-circle text-xl"></i><span class="font-medium text-sm">${message}</span>`;
-            }
-
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            
-            clearTimeout(toastTimeout);
-            toastTimeout = setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3500);
+            showToast("Tu trabajo ha sido enviado al coordinador para su revisión.");
         }
 
-        // Copy Citation
-        function copyCitation(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                showToast("Cita copiada al portapapeles");
-            }).catch(err => {
-                // Fallback for some iframe environments
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    showToast("Cita copiada al portapapeles");
-                } catch (err) {
-                    showToast("Error al copiar cita", true);
-                }
-                document.body.removeChild(textArea);
-            });
+        // Sistema de Notificaciones (Toasts)
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.innerText = message;
+            toast.className = "toast show";
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
         }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initial sort
-            monographs.sort((a, b) => b.year - a.year);
-            renderMonographs(monographs);
-        });
-
     </script>
 </body>
 </html>
